@@ -12,7 +12,7 @@ Then copy the file at `~/Desktop/playcounts.plist` onto the Desktop of computer 
 
 This will add the playcounts for each track on A to the corresponding tracks on B.
 
-It will also set the ratings, the last played date to the latest date, and the date added to the earliest date.
+It will also set the ratings and the last played date to the latest date.
 
 
 ## Limitations

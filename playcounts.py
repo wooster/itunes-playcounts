@@ -24,7 +24,7 @@ def bail(error=None):
     sys.exit(1)
 
 def attrs():
-    update_attrs = ["playedCount", "playedDate", "rating", "dateAdded"]
+    update_attrs = ["playedCount", "playedDate", "rating"]
     update_attrs.extend(signature_attrs())
     return update_attrs
 
@@ -130,7 +130,7 @@ def track_matches_data(track, data):
             return False
     return True
 
-def update_track_with_data(track, data, verbose=True):
+def update_track_with_data(track, data, mutate=True, verbose=True):
     # Update the iTunes track with the given data.
     actions = []
     # played count
@@ -138,6 +138,8 @@ def update_track_with_data(track, data, verbose=True):
     if playedCount > 0:
         current_played_count = track.playedCount()
         actions.append("Setting played count to %d from %d" % (playedCount + current_played_count, current_played_count))
+        if mutate:
+            track.setValue_forKey_(playedCount + current_played_count, 'playedCount')
     # played date
     playedDate = data.get('playedDate')
     if playedDate:
@@ -145,19 +147,16 @@ def update_track_with_data(track, data, verbose=True):
         if playedDate.compare_(current_played_date) == 1:
             # decending
             actions.append("Setting played date to: %s from %s" % (playedDate, current_played_date))
-    # date added
-    dateAdded = data.get('dateAdded')
-    if dateAdded:
-        current_date_added = track.dateAdded()
-        if dateAdded.compare_(current_date_added) == -1:
-            # ascending
-            actions.append("Setting date added to: %s from %s" % (dateAdded, current_date_added))
+            if mutate:
+                track.setValue_forKey_(playedDate, 'playedDate')
     # rating
     rating = data.get('rating')
     if rating:
         current_rating = track.rating()
         if not current_rating:
             actions.append("Setting rating to: %d from %d" % (rating, current_rating))
+            if mutate:
+                track.setValue_forKey_(rating, 'rating')
     if len(actions) and verbose:
         print >> sys.stderr, track.artist(), "-", track.name()
         for action in actions:
