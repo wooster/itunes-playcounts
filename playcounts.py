@@ -51,8 +51,16 @@ def get_tracks():
     itunes = SBApplication.applicationWithBundleIdentifier_('com.apple.iTunes')
     library_playlist = itunes.sources()[0].libraryPlaylists()[0]
     tracks = library_playlist.tracks()
-    print >> sys.stderr, "Found %d tracks." % tracks.count()
-    return tracks
+    track_results = [track in tracks if track_is_filetrack(track)]
+    print >> sys.stderr, "Found %d tracks." % len(track_results)
+    return track_results
+
+def track_is_filetrack(track):
+    track_obj = track.get()
+    if track_obj.__class__.__name__ == 'ITunesFileTrack':
+        return True
+    else:
+        return False
 
 def track_to_filetrack(track):
     track_obj = track.get()
@@ -107,7 +115,7 @@ class TracksByName(object):
             self.by_name.setdefault(name, [])
             self.by_name[name].append(track)
     def tracks_with_name(self, name):
-        return self.by_name[name]
+        return self.by_name.get(name, [])
 
 def track_matches_data(track, data):
     # Return true if the track matches the signature attributes in data.
