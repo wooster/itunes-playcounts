@@ -51,7 +51,7 @@ def get_tracks():
     itunes = SBApplication.applicationWithBundleIdentifier_('com.apple.iTunes')
     library_playlist = itunes.sources()[0].libraryPlaylists()[0]
     tracks = library_playlist.tracks()
-    track_results = [track in tracks if track_is_filetrack(track)]
+    track_results = [track for track in tracks if track_is_filetrack(track)]
     print >> sys.stderr, "Found %d tracks." % len(track_results)
     return track_results
 
