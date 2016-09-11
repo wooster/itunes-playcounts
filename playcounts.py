@@ -64,9 +64,6 @@ def track_to_filetrack(track):
 def tracks_to_data(tracks):
     data = []
     for track in tracks:
-        track_obj = track_to_filetrack(track)
-        if not track_obj:
-            continue
         #location = track_obj.location()
         #if not location:
         #    print >> sys.stderr, "No location:", track_obj.name()
@@ -74,7 +71,7 @@ def tracks_to_data(tracks):
         #path = location.path()
         #if not os.path.exists(path):
         #    print >> sys.stderr, "Not found:", path
-        data.append(track_to_dict(track_obj))
+        data.append(track_to_dict(track))
     return data
 
 def backup_itunes_library():
@@ -106,10 +103,7 @@ class TracksByName(object):
     def __init__(self, tracks):
         self.tracks = tracks
         for track in self.tracks:
-            track_obj = track_to_filetrack(track)
-            if not track_obj:
-                continue
-            name = track_obj.name()
+            name = track.name()
             self.by_name.setdefault(name, [])
             self.by_name[name].append(track)
     def tracks_with_name(self, name):
@@ -117,54 +111,47 @@ class TracksByName(object):
 
 def track_matches_data(track, data):
     # Return true if the track matches the signature attributes in data.
-    track_obj = track_to_filetrack(track)
-    if not track_obj:
-        return False
     attrs = signature_attrs()
     for attr in attrs:
         track_value = getattr(track, attr)()
         data_value = data.get(attr)
-        if not data_value:
+        if not data_value and track_value:
             print >> sys.stderr, "Missing signature value for", attr, "in track:", data.get('name')
             return False
         if track_value != data_value:
-            print >> sys.stderr, track_value, "!=", data_value
             return False
     return True
 
-def update_track_with_data(track, data):
+def update_track_with_data(track, data, verbose=True):
     # Update the iTunes track with the given data.
-    track_obj = track_to_filetrack(track)
-    if not track_obj:
-        return False
     actions = []
     # played count
     playedCount = data.get('playedCount', 0)
     if playedCount > 0:
-        current_played_count = track_obj.playedCount()
+        current_played_count = track.playedCount()
         actions.append("Setting played count to %d from %d" % (playedCount + current_played_count, current_played_count))
     # played date
     playedDate = data.get('playedDate')
     if playedDate:
-        current_played_date = track_obj.playedDate()
+        current_played_date = track.playedDate()
         if playedDate.compare_(current_played_date) == 1:
             # decending
             actions.append("Setting played date to: %s from %s" % (playedDate, current_played_date))
     # date added
     dateAdded = data.get('dateAdded')
     if dateAdded:
-        current_date_added = track_obj.dateAdded()
+        current_date_added = track.dateAdded()
         if dateAdded.compare_(current_date_added) == -1:
             # ascending
             actions.append("Setting date added to: %s from %s" % (dateAdded, current_date_added))
     # rating
     rating = data.get('rating')
     if rating:
-        current_rating = track_obj.rating()
+        current_rating = track.rating()
         if not current_rating:
             actions.append("Setting rating to: %d from %d" % (rating, current_rating))
-    if len(actions):
-        print >> sys.stderr, track_obj.name()
+    if len(actions) and verbose:
+        print >> sys.stderr, track.name()
         for action in actions:
             print >> sys.stderr, "\t", action
 
@@ -179,7 +166,7 @@ def update_itunes_with_data(data, verbose=True):
         matching_tracks = tracks_by_name.tracks_with_name(track_data['name'])
         for track in matching_tracks:
             if track_matches_data(track, track_data):
-                update_track_with_data(track, track_data)
+                update_track_with_data(track, track_data, verbose=verbose)
 
 def main(argv):
     if len(argv) < 2:
