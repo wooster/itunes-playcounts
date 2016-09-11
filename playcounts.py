@@ -159,7 +159,7 @@ def update_track_with_data(track, data, verbose=True):
         if not current_rating:
             actions.append("Setting rating to: %d from %d" % (rating, current_rating))
     if len(actions) and verbose:
-        print >> sys.stderr, track.name()
+        print >> sys.stderr, track.artist(), "-", track.name()
         for action in actions:
             print >> sys.stderr, "\t", action
 
