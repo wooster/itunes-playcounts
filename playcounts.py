@@ -72,13 +72,6 @@ def track_to_filetrack(track):
 def tracks_to_data(tracks):
     data = []
     for track in tracks:
-        #location = track_obj.location()
-        #if not location:
-        #    print >> sys.stderr, "No location:", track_obj.name()
-        #    continue
-        #path = location.path()
-        #if not os.path.exists(path):
-        #    print >> sys.stderr, "Not found:", path
         data.append(track_to_dict(track))
     return data
 
@@ -145,7 +138,7 @@ def update_track_with_data(track, data, mutate=True, verbose=True):
     if playedDate:
         current_played_date = track.playedDate()
         if playedDate.compare_(current_played_date) == 1:
-            # decending
+            # descending
             actions.append("Setting played date to: %s from %s" % (playedDate, current_played_date))
             if mutate:
                 track.setValue_forKey_(playedDate, 'playedDate')
@@ -197,8 +190,6 @@ def main(argv):
     if command == "export":
         tracks = get_tracks()
         data = tracks_to_data(tracks)
-        #for track in data:
-        #    print track
         nsa = NSArray(data)
         xml_plist_data, error = NSPropertyListSerialization.dataWithPropertyList_format_options_error_(nsa, NSPropertyListXMLFormat_v1_0, 0, None)
         if xml_plist_data:
